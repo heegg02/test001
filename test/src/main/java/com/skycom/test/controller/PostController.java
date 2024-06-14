@@ -39,11 +39,10 @@ public class PostController {
     }
 
     @PutMapping("/update")
-    public void boardSearch(Model model,
-                              @RequestBody Long id,
-                              @RequestBody String gender,
-                              @RequestBody int age,
-                              @RequestBody String location) {
+    public void updatePost(@RequestBody Long id,
+                            @RequestBody String gender,
+                            @RequestBody int age,
+                            @RequestBody String location) {
         postService.updatePost(id, gender, age, location);
     }
 
