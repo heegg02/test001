@@ -7,6 +7,8 @@
 [ 옵션 ]
 4. 엑셀파일생성 : 저장된 게시글 목록을 Excel 파일로 저장
 5. 파일업로드/다운로드 : 게시판 파일 첨부하여 저장 및 다운로드
+
+start: ./gradlew bootRun
 --%>
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
