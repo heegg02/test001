@@ -7,6 +7,7 @@ body {
 }
 
 .board_box {
+    width: 850px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -14,6 +15,7 @@ body {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    
 }
 
 .board_title {
@@ -42,6 +44,7 @@ button, .exelContainer label, #uploadFileInput {
     border-radius: 20px;
     border: none;
     height: 100%;
+    white-space: nowrap;
 }
 
 button:hover, .exelContainer label:hover, #uploadFileInput:hover {
@@ -59,9 +62,6 @@ button:hover, .exelContainer label:hover, #uploadFileInput:hover {
 } 
 
 .numberBtnContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     margin-left: 20px;
     margin-right: 20px;
 }
@@ -76,8 +76,9 @@ button:hover, .exelContainer label:hover, #uploadFileInput:hover {
 }
 
 table {
+    width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;
+    table-layout: auto;
 }
 
 .postTitle th {
@@ -107,4 +108,9 @@ table {
 
 .mb_10px {
     margin: 10px;
+}
+
+.nowrap {
+    display: flex;
+    flex-wrap: nowrap
 }

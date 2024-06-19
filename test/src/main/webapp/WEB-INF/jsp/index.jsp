@@ -64,7 +64,7 @@ start: ./gradlew bootRun
 <body>
     <div class="board_box">
         <div>
-            <div class="exelContainer mb_10px">
+            <div class="exelContainer nowrap mb_10px">
                 <form id="uploadForm" class="fileBox" enctype="multipart/form-data">
                     <input id="uploadFileInput" type="file" name="file" accept=".xls, .xlsx"/>
                     <button id="uploadBtn" type="button" onclick="return uploadExel()">업로드</button>
@@ -73,7 +73,7 @@ start: ./gradlew bootRun
                     <button id="downloadBtn" type="button" onclick="return downloadExel()">다운로드</button>
                 </div>
             </div>
-            <form class="selectContainer mb_10px" id="searchForm" onsubmit="return postSearch()">
+            <form class="selectContainer nowrap mb_10px" id="searchForm" onsubmit="return postSearch()">
                 <select name="gender">
                     <option value="">--성별--</option>
                     <option disabled>-------</option>
@@ -92,7 +92,7 @@ start: ./gradlew bootRun
                 </select>
                 <button class="selectBtn" type="submit">찾기</button>
             </form>
-            <form class="insertContainer mb_10px" id="inputForm" onsubmit="return insertPost()">
+            <form class="insertContainer nowrap mb_10px" id="inputForm" onsubmit="return insertPost()">
                 <input type="text" id="insertGender" name="insertGender" placeholder="성별"/>
                 <input type="text" id="insertAge" name="insertAge" placeholder="나이"/>
                 <input type="text" id="insertLocation" name="insertLocation" placeholder="주소"/>
@@ -112,6 +112,7 @@ start: ./gradlew bootRun
                             <th>Gender</th>
                             <th>Age</th>
                             <th>Location</th>
+                            <th></th>
                         </tr>
                         <c:forEach var="post" items="${posts}" varStatus="status">
                             <tr id="postId_${post.id}" class="postRow">
@@ -121,22 +122,24 @@ start: ./gradlew bootRun
                                 <td><input type="text" placeholder="${post.age}" id="updateAge" value="${post.age}"/></td>
                                 <td><input type="text" placeholder="${post.location}" id="updateLocation" value="${post.location}"/></td>
                                 <td>
+                                    <div class="nowrap">
                                     <button class="updateBtn" type="submit" onclick="return updatePost(${post.id})">수정</button>
                                     <button class="deleteBtn" type="submit" onclick="return deletePost(${post.id})">삭제</button>
+                                    </div>
                                 </td>
                             </tr>
                         </c:forEach>
                     </table>
                     <div class="pagingContainer">
                         <c:if test="${!(firstPage)}">
-                            <div class="controlBtnContainer">
+                            <div class="controlBtnContainer nowrap">
                                 <c:if test="${!(firstBtn == 1)}">
                                     <button class="pagingBtn" onclick="movePage(1)">처음</button>
                                 </c:if>
                                 <button class="pagingBtn" onclick="movePage(${currentPage-1})">이전</button>
                             </div>
                         </c:if>
-                        <div class="numberBtnContainer">
+                        <div class="numberBtnContainer nowrap">
                             <c:forEach var="idx" begin="${firstBtn}" end="${endBtn}">
                                 <c:choose>
                                     <c:when test="${currentPage == idx}">
@@ -149,7 +152,7 @@ start: ./gradlew bootRun
                             </c:forEach>
                         </div>
                         <c:if test="${!(lastPage)}">
-                            <div class="controlBtnContainer">
+                            <div class="controlBtnContainer nowrap">
                                 <button class="pagingBtn" onclick="movePage(${currentPage+1})">다음</button>
                                 <c:if test="${!(endBtn == pageLength)}">
                                     <button class="pagingBtn" onclick="movePage(${pageLength})">끝</button>
