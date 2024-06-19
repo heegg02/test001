@@ -14,15 +14,25 @@ public class PostService {
     private PostRepository postRepository;
 
     public List<String> gendersTypeSelector() {
-        return postRepository.gendersType();
+        return postRepository.findGendersType();
     }
 
     public List<String> locationsTypeSelector() {
-        return postRepository.locationsType();
+        return postRepository.findLocationsType();
     }
 
-    public List<Post> postSelector(String gender, int minAge, int maxAge, String location) {
-        return postRepository.findPosts(gender, minAge, maxAge, location);
+    public int postsLength(String gender, int minAge, int maxAge, String location) {
+        return postRepository.findPostsLength(gender, minAge, maxAge, location);
+    }
+
+    public List<Post> postSelector(int page, String gender, int minAge, int maxAge, String location) {
+        int start = page * 10 - 10;
+
+        return postRepository.findPosts(start, gender, minAge, maxAge, location);
+    }
+
+    public void insertPost(String gender, int age, String location) {
+        postRepository.insertPost(gender, age, location);
     }
 
     public void updatePost(Long id, String gender, int age, String location) {
@@ -33,5 +43,7 @@ public class PostService {
         postRepository.deleteById(id);
     }
 
-
+    public List<Post> downloadPost() {
+        return postRepository.findAll();
+    }
 }

@@ -14,8 +14,9 @@ start: ./gradlew bootRun
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="java.util.List" %>
-<% 
-    int postsLength = ((List)request.getAttribute("posts")).size();
+<%@ page import="com.skycom.test.domain.Post" %>
+<%
+    int postsLength = (int)request.getAttribute("postsLength");
     int currentPage = 1;
 
     if(request.getParameter("page") != null) {
@@ -26,16 +27,6 @@ start: ./gradlew bootRun
         }
     } 
 
-    int end = currentPage * 10 - 1;
-    int begin = end - 9;
-
-    if(postsLength < end) {
-        end = postsLength;
-    }
-
-    if (begin < 0) {
-        begin = 0;
-    }
     int pageLength = (int) Math.ceil(postsLength / 10.0);
 
     boolean firstPage = (currentPage == 1);
@@ -58,24 +49,11 @@ start: ./gradlew bootRun
         firstBtn = 1;
     }
     request.setAttribute("currentPage", currentPage);
-    request.setAttribute("begin", begin);
-    request.setAttribute("end", end);
     request.setAttribute("pageLength", pageLength);
     request.setAttribute("firstPage", firstPage);
     request.setAttribute("lastPage", lastPage);
     request.setAttribute("firstBtn", firstBtn);
     request.setAttribute("endBtn", endBtn);
-
-    System.out.println("currentPage " + currentPage);
-    System.out.println("begin " + begin);
-    System.out.println("end " + end);
-    System.out.println("postsLength " + postsLength);
-    System.out.println("pageLength " + pageLength);
-    System.out.println("firstPage " + firstPage);
-    System.out.println("lastPage " + lastPage);
-    System.out.println("firstBtn " + firstBtn);
-    System.out.println("endBtn " + endBtn);
-    System.out.println("maxBtn " + maxBtn);
 %>
 <!DOCTYPE html>
 <html>
@@ -85,11 +63,19 @@ start: ./gradlew bootRun
 </head>
 <body>
     <div class="board_box">
-        <h3 class="board_title">Board</h3>
         <div>
-            <form id="searchForm" onsubmit="postSearch()">
+            <div class="exelContainer mb_10px">
+                <form id="uploadForm" class="fileBox" enctype="multipart/form-data">
+                    <input id="uploadFileInput" type="file" name="file" accept=".xls, .xlsx"/>
+                    <button id="uploadBtn" type="button" onclick="return uploadExel()">업로드</button>
+                </form>
+                <div>
+                    <button id="downloadBtn" type="button" onclick="return downloadExel()">다운로드</button>
+                </div>
+            </div>
+            <form class="selectContainer mb_10px" id="searchForm" onsubmit="return postSearch()">
                 <select name="gender">
-                    <option value="">성별</option>
+                    <option value="">--성별--</option>
                     <option disabled>-------</option>
                     <c:forEach var="gender" items="${genders}">
                         <option value="${gender}" <c:if test="${param.gender == gender}">selected</c:if>>${gender}</option>
@@ -98,7 +84,7 @@ start: ./gradlew bootRun
                 <input type="text" id="minAge" name="minAge" placeholder="최소 나이" value="${param.minAge}"/>
                 <input type="text" id="maxAge" name="maxAge" placeholder="최대 나이" value="${param.maxAge}"/>
                 <select name="location">
-                    <option value="">지역</option>
+                    <option value="">--지역--</option>
                     <option disabled>-------</option>
                     <c:forEach var="location" items="${locations}">
                         <option value="${location}"  <c:if test="${param.location == location}">selected</c:if>>${location}</option>
@@ -106,133 +92,228 @@ start: ./gradlew bootRun
                 </select>
                 <button class="selectBtn" type="submit">찾기</button>
             </form>
-        </div>
-        <div>
-            <form id="inputForm" onsubmit="">
+            <form class="insertContainer mb_10px" id="inputForm" onsubmit="return insertPost()">
                 <input type="text" id="insertGender" name="insertGender" placeholder="성별"/>
                 <input type="text" id="insertAge" name="insertAge" placeholder="나이"/>
                 <input type="text" id="insertLocation" name="insertLocation" placeholder="주소"/>
                 <button class="selectBtn" type="submit">등록</button>
             </form>
         </div>
-        <c:choose>
-            <c:when test="${pageLength==0}">
-                <h1>조건에 맞는 데이터가 존재하지 않습니다.</h1>
-            </c:when>
-            <c:otherwise>
-                <table>
-                    <tr>
-                        <th>No</th>
-                        <th>Id</th>
-                        <th>Gender</th>
-                        <th>Age</th>
-                        <th>Location</th>
-                        <th></th>
-                    </tr>
-                    <c:forEach var="post" items="${posts}" begin="${begin}" end="${end}" varStatus="status">
-                        <tr id="postId_${post.id}">
-                            <td>${status.index+1}</td>
-                            <td>${post.id}</td>
-                            <td><input type="text" placeholder="${post.gender}" id="updateGender" value="${post.gender}"/></td>
-                            <td><input type="text" placeholder="${post.age}" id="updateAge" value="${post.age}"/></td>
-                            <td><input type="text" placeholder="${post.location}" id="updateLocation" value="${post.location}"/></td>
-                            <td>
-                               <button class="updateBtn" type="submit" onclick="updatePost(${post.id})">수정</button>
-                               <button class="deleteBtn" type="submit" onclick="deletePost(${post.id})">삭제</button>
-                            </td>
+        <div class="postContainer">
+            <c:choose>
+                <c:when test="${pageLength==0}">
+                    <h1>조건에 맞는 데이터가 존재하지 않습니다.</h1>
+                </c:when>
+                <c:otherwise>
+                    <table>
+                        <tr class="postTitle">
+                            <th>No</th>
+                            <th>Id</th>
+                            <th>Gender</th>
+                            <th>Age</th>
+                            <th>Location</th>
                         </tr>
-                    </c:forEach>
-                </table>
-                <div>
-                    <c:if test="${!(firstPage)}">
-                        <c:if test="${!(firstBtn == 1)}">
-                            <button class="paging_btn" onclick="pageingBtn(1)">처음</button>
+                        <c:forEach var="post" items="${posts}" varStatus="status">
+                            <tr id="postId_${post.id}" class="postRow">
+                                <th>${(currentPage*10-10)+status.index+1}</th>
+                                <td>${post.id}</td>
+                                <td><input type="text" placeholder="${post.gender}" id="updateGender" value="${post.gender}"/></td>
+                                <td><input type="text" placeholder="${post.age}" id="updateAge" value="${post.age}"/></td>
+                                <td><input type="text" placeholder="${post.location}" id="updateLocation" value="${post.location}"/></td>
+                                <td>
+                                    <button class="updateBtn" type="submit" onclick="return updatePost(${post.id})">수정</button>
+                                    <button class="deleteBtn" type="submit" onclick="return deletePost(${post.id})">삭제</button>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </table>
+                    <div class="pagingContainer">
+                        <c:if test="${!(firstPage)}">
+                            <div class="controlBtnContainer">
+                                <c:if test="${!(firstBtn == 1)}">
+                                    <button class="pagingBtn" onclick="movePage(1)">처음</button>
+                                </c:if>
+                                <button class="pagingBtn" onclick="movePage(${currentPage-1})">이전</button>
+                            </div>
                         </c:if>
-                        <button class="paging_btn" onclick="pageingBtn(${currentPage-1})">이전</button>
-                    </c:if>
-                    <c:forEach var="idx" begin="${firstBtn}" end="${endBtn}">
-                        <c:choose>
-                            <c:when test="${currentPage == idx}">
-                                <button class="paging_btn currentPage" onclick="pageingBtn(${idx})">${idx}</button>
-                            </c:when>
-                            <c:otherwise>
-                                <button class="paging_btn" onclick="pageingBtn(${idx})">${idx}</button>
-                            </c:otherwise>
-                        </c:choose>
-                    </c:forEach>
-                    <c:if test="${!(lastPage)}">
-                        <button class="paging_btn" onclick="pageingBtn(${currentPage+1})">다음</button>
-                        <c:if test="${!(endBtn == pageLength)}">
-                            <button class="paging_btn" onclick="pageingBtn(${pageLength})">끝</button>
+                        <div class="numberBtnContainer">
+                            <c:forEach var="idx" begin="${firstBtn}" end="${endBtn}">
+                                <c:choose>
+                                    <c:when test="${currentPage == idx}">
+                                        <button class="pagingBtn currentBtn">${idx}</button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <button class="pagingBtn" onclick="movePage(${idx})">${idx}</button>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+                        </div>
+                        <c:if test="${!(lastPage)}">
+                            <div class="controlBtnContainer">
+                                <button class="pagingBtn" onclick="movePage(${currentPage+1})">다음</button>
+                                <c:if test="${!(endBtn == pageLength)}">
+                                    <button class="pagingBtn" onclick="movePage(${pageLength})">끝</button>
+                                </c:if>
+                            </div>
                         </c:if>
-                    </c:if>
-                </div>
-                <div>
-                    <h3>${currentPage}/${pageLength}</h3>
-                </div>
-            </c:otherwise>
-        </c:choose>
+                    </div>
+                    <div>
+                        <h3>${currentPage}/${pageLength}</h3>
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </div>
     </div>
     <script>
         function postSearch() {
             const minAge = document.getElementById('minAge').value;
             const maxAge = document.getElementById('maxAge').value;
-            if (minAge && maxAge) {
-                if(minAge > maxAge) {
-                    alert("최소 나이 값이 최대 나이 값보다 높습니다.");
-                    return false;
-                }
+            
+            if (isNaN(minAge) || isNaN(maxAge)) {
+                alert("나이에는 숫자만 입력 가능합니다. \nex) 20살 -> 20");
+                return false;
             }
-            return true;
+            if (parseInt(minAge) > parseInt(maxAge)) {
+                alert("최소 나이 값이 최대 나이 값보다 높습니다.");
+                return false;
+            } else {
+                return true;
+            }
         }
-        
-        function pageingBtn(idx) {
+
+        function movePage(idx) {
             const params = new URLSearchParams(window.location.search);
             params.set('page', idx);
             window.location.href = '?'+params.toString()
         }
         
+        function fetchPostDate(url, data) {
+            fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!(response.ok)) {
+                    throw new Error(`${response.status} 에러 발생`)
+                }
+                return response.text();
+            })
+            .then(data => {
+                alert(data);
+                movePage(1);
+            })
+            .catch(error => {
+                alert(error);
+            })
+        }
+
+        function insertPost() {
+            const gender = document.getElementById('insertGender').value;
+            const age = document.getElementById('insertAge').value;
+            const location = document.getElementById('insertLocation').value;
+            if (!(gender && age && location)) {
+                alert('값이 비어있습니다.');
+                return false;
+            }
+            if (isNaN(age)) {
+                alert("나이에는 숫자만 입력 가능합니다. \nex) 20살 -> 20");
+                return false;
+            }
+            if (confirm('정말로 성별: '+gender+', 나이: '+age+', 주소: '+location+'(을)를 저장하시겠습니까?')) {
+                const url = '/api/insert';
+                const data = {
+                    gender: gender,
+                    age: age,
+                    location: location
+                };
+                fetchPostDate(url, data);
+                return;
+            } else {
+                return false;
+            }
+        }
+        
         function updatePost(postId) {
-            if (confirm('정말로 Post id.'+postId+'를 수정하시겠습니까?')) {
+            if (confirm('정말로 Post id: '+postId+'를 수정하시겠습니까?')) {
                 const gender = document.getElementById('postId_'+postId).querySelector('#updateGender').value;
                 const age = document.getElementById('postId_'+postId).querySelector('#updateAge').value;
                 const location = document.getElementById('postId_'+postId).querySelector('#updateLocation').value;
-                const url = 'http://localhost:8080/update';
-                console.log(url)
-
-                fetch(url, {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        id: postId,
-                        gender: gender,
-                        age: age,
-                        location: location
-                    })
-                })
-
-                alert("수정 성공");
-                const params = new URLSearchParams(window.location.search);
-                params.set('page', 1);
-                // window.location.href = '?'+params.toString()
+                const url = '/api/update';
+                const data = {
+                    id : postId,
+                    gender : gender,
+                    age : age,
+                    location : location
+                };
+                fetchPostDate(url, data);
+                return;
+            } else {
+                return false;
             }
         }
 
         function deletePost(postId) {
-            if (confirm('정말로 Post id.'+postId+'를 삭제하시겠습니까?')) {
-                const url = 'http://localhost:8080/delete?id='+postId;
-                console.log(url)
-
-                fetch(url, {
-                    method: 'DELETE',
-                    headers: {'Content-Type': 'application/json'}
-                })
-
-                alert("수정 성공");
-                const params = new URLSearchParams(window.location.search);
-                params.set('page', 1);
-                window.location.href = '?'+params.toString()
+            if (confirm('정말로 Post id: '+postId+'를 삭제하시겠습니까?')) {
+                const url = '/api/delete';
+                const data = {
+                    id: postId
+                };
+                fetchPostDate(url, data);
+                return;
+            } else {
+                return false;
             }
+        }
+        
+        function downloadExel() {
+            const url = '/api/download';
+            fetch(url, {
+                method: 'GET',
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();  // Response as blob to handle file download
+                }
+                throw new Error(`${response.status} 에러 발생`);
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'posts.xlsx';  // Specify the file name
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                alert(error);
+            });
+        }
+
+        function uploadExel() {
+            const uploadFormData = new FormData(document.getElementById('uploadForm'));
+            const url = '/api/upload';
+
+            fetch(url, {
+                method: 'POST',
+                body: uploadFormData
+            })
+            .then(response => {
+                if (!(response.ok)) {
+                    throw new Error(`${response.status} 에러 발생`)
+                }
+                return response.text();
+            })
+            .then(data => {
+                alert(data);
+                movePage(1);
+            })
+            .catch(error => {
+                alert(error);
+            })
         }
     </script>
 </body>
