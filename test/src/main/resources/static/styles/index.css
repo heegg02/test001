@@ -114,3 +114,7 @@ table {
     display: flex;
     flex-wrap: nowrap
 }
+
+.selectForm input {
+    width: auto;
+}

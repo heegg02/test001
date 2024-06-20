@@ -62,10 +62,10 @@ start: ./gradlew bootRun
     <title>test</title>
 </head>
 <body>
-    <div class="board_box">
+    <div class="board_box nowrap">
         <div>
             <div class="exelContainer nowrap mb_10px">
-                <form id="uploadForm" class="fileBox" enctype="multipart/form-data">
+                <form id="uploadForm" class="nowrap" enctype="multipart/form-data">
                     <input id="uploadFileInput" type="file" name="file" accept=".xls, .xlsx"/>
                     <button id="uploadBtn" type="button" onclick="return uploadExel()">업로드</button>
                 </form>
@@ -73,7 +73,8 @@ start: ./gradlew bootRun
                     <button id="downloadBtn" type="button" onclick="return downloadExel()">다운로드</button>
                 </div>
             </div>
-            <form class="selectContainer nowrap mb_10px" id="searchForm" onsubmit="return postSearch()">
+            <form class="selectForm nowrap mb_10px" id="searchForm" onsubmit="return postSearch()">
+                <input type="text" id="id" name="id" placeholder="회원번호" value="${param.id}"/>
                 <select name="gender">
                     <option value="">--성별--</option>
                     <option disabled>-------</option>
@@ -123,8 +124,8 @@ start: ./gradlew bootRun
                                 <td><input type="text" placeholder="${post.location}" id="updateLocation" value="${post.location}"/></td>
                                 <td>
                                     <div class="nowrap">
-                                    <button class="updateBtn" type="submit" onclick="return updatePost(${post.id})">수정</button>
-                                    <button class="deleteBtn" type="submit" onclick="return deletePost(${post.id})">삭제</button>
+                                        <button class="updateBtn" type="submit" onclick="return updatePost(${post.id})">수정</button>
+                                        <button class="deleteBtn" type="submit" onclick="return deletePost(${post.id})">삭제</button>
                                     </div>
                                 </td>
                             </tr>
@@ -169,19 +170,22 @@ start: ./gradlew bootRun
     </div>
     <script>
         function postSearch() {
+            const id = document.getElementById('id').value;
             const minAge = document.getElementById('minAge').value;
             const maxAge = document.getElementById('maxAge').value;
-            
+            if (isNaN(id)) {
+                alert("회원번호는 숫자만 입력 가능합니다.");
+                return false;
+            }
             if (isNaN(minAge) || isNaN(maxAge)) {
-                alert("나이에는 숫자만 입력 가능합니다. \nex) 20살 -> 20");
+                alert("나이는 숫자만 입력 가능합니다.\nex) 20살 -> 20");
                 return false;
             }
             if (parseInt(minAge) > parseInt(maxAge)) {
                 alert("최소 나이 값이 최대 나이 값보다 높습니다.");
                 return false;
-            } else {
-                return true;
             }
+            return true;
         }
 
         function movePage(idx) {
@@ -230,8 +234,7 @@ start: ./gradlew bootRun
                     age: age,
                     location: location
                 };
-                fetchPostDate(url, data);
-                return;
+                return fetchPostDate(url, data);
             } else {
                 return false;
             }
@@ -242,6 +245,10 @@ start: ./gradlew bootRun
                 const gender = document.getElementById('postId_'+postId).querySelector('#updateGender').value;
                 const age = document.getElementById('postId_'+postId).querySelector('#updateAge').value;
                 const location = document.getElementById('postId_'+postId).querySelector('#updateLocation').value;
+                if (isNaN(age)) {
+                    alert("나이에는 숫자만 입력 가능합니다. \nex) 20살 -> 20");
+                    return false;
+                }
                 const url = '/api/update';
                 const data = {
                     id : postId,
@@ -249,8 +256,7 @@ start: ./gradlew bootRun
                     age : age,
                     location : location
                 };
-                fetchPostDate(url, data);
-                return;
+                return fetchPostDate(url, data);
             } else {
                 return false;
             }
@@ -262,8 +268,7 @@ start: ./gradlew bootRun
                 const data = {
                     id: postId
                 };
-                fetchPostDate(url, data);
-                return;
+                return fetchPostDate(url, data);
             } else {
                 return false;
             }
@@ -277,7 +282,7 @@ start: ./gradlew bootRun
             })
             .then(response => {
                 if (response.ok) {
-                    return response.blob();  // Response as blob to handle file download
+                    return response.blob();
                 }
                 throw new Error(`${response.status} 에러 발생`);
             })
@@ -286,7 +291,7 @@ start: ./gradlew bootRun
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = url;
-                a.download = 'posts.xlsx';  // Specify the file name
+                a.download = 'posts.xlsx';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -298,8 +303,15 @@ start: ./gradlew bootRun
 
         function uploadExel() {
             const uploadFormData = new FormData(document.getElementById('uploadForm'));
-            const url = '/api/upload';
+            const uploadFileInput = document.getElementById('uploadFileInput')
+            const uploadFileName = uploadFileInput.files[0].name
+            const uploadFileExtension = uploadFileName.split('.')[1];
 
+            const url = '/api/upload';
+            if (!(uploadFileExtension == 'xlsx' || uploadFileExtension == 'xls')) {
+                alert("'"+uploadFileName+"'은 잘못된 파일 형식입니다.\n엑셀 형식의 파일만 업로드 가능합니다.\nex) .xlsx, .xls")
+                return false;
+            }
             fetch(url, {
                 method: 'POST',
                 body: uploadFormData

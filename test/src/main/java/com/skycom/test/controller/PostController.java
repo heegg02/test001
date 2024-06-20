@@ -36,15 +36,16 @@ public class PostController {
     @GetMapping("/")
     public String main(Model model,
                         @RequestParam(name="page", required=false, defaultValue="1") int page,
+                        @RequestParam(name="id", required=false, defaultValue="0") Long id,
                         @RequestParam(name="gender", required=false, defaultValue="") String gender,
                         @RequestParam(name="minAge", required=false, defaultValue="0") int minAge,
                         @RequestParam(name="maxAge", required=false, defaultValue="0") int maxAge,
                         @RequestParam(name="location", required=false, defaultValue="") String location) {
 
-        int postsLength = postService.postsLength(gender, minAge, maxAge, location);
+        int postsLength = postService.postsLength(id, gender, minAge, maxAge, location);
         List<String> genders = postService.gendersTypeSelector();
         List<String> locations = postService.locationsTypeSelector();
-        List<Post> posts = postService.postSelector(page, gender, minAge, maxAge, location);
+        List<Post> posts = postService.postSelector(id, page, gender, minAge, maxAge, location);
 
         model.addAttribute("posts", posts);
         model.addAttribute("genders", genders);

@@ -32,14 +32,16 @@ public class PostRepository {
         );
     }
         
-    public int findPostsLength(String gender, int minAge, int maxAge, String location){
+    public int findPostsLength(Long id, String gender, int minAge, int maxAge, String location){
         String sql = "SELECT COUNT(id) FROM post WHERE " +
+            "(:id = 0 OR id = :id) AND " +
             "(:gender = '' OR gender = :gender) AND " +
             "(:minAge = 0 OR age >= :minAge) AND " +
             "(:maxAge = 0 OR age <= :maxAge) AND " +
             "(:location = '' OR location = :location)";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
+            .addValue("id", id)
             .addValue("gender", gender)
             .addValue("minAge", minAge)
             .addValue("maxAge", maxAge)
@@ -49,8 +51,9 @@ public class PostRepository {
         return (count != null) ? count : 0;
     }
 
-    public List<Post> findPosts(int start, String gender, int minAge, int maxAge, String location) {
+    public List<Post> findPosts(int start, Long id, String gender, int minAge, int maxAge, String location) {
         String sql = "SELECT * FROM post WHERE " +
+            "(:id = 0 OR id = :id) AND " +
             "(:gender = '' OR gender = :gender) AND " +
             "(:minAge = 0 OR age >= :minAge) AND " +
             "(:maxAge = 0 OR age <= :maxAge) AND " +
@@ -58,6 +61,7 @@ public class PostRepository {
             "LIMIT :start, 10";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
+            .addValue("id", id)
             .addValue("gender", gender)
             .addValue("minAge", minAge)
             .addValue("maxAge", maxAge)

@@ -21,14 +21,14 @@ public class PostService {
         return postRepository.findLocationsType();
     }
 
-    public int postsLength(String gender, int minAge, int maxAge, String location) {
-        return postRepository.findPostsLength(gender, minAge, maxAge, location);
+    public int postsLength(Long id, String gender, int minAge, int maxAge, String location) {
+        return postRepository.findPostsLength(id, gender, minAge, maxAge, location);
     }
 
-    public List<Post> postSelector(int page, String gender, int minAge, int maxAge, String location) {
+    public List<Post> postSelector(Long id, int page, String gender, int minAge, int maxAge, String location) {
         int start = page * 10 - 10;
 
-        return postRepository.findPosts(start, gender, minAge, maxAge, location);
+        return postRepository.findPosts(start, id, gender, minAge, maxAge, location);
     }
 
     public void insertPost(String gender, int age, String location) {

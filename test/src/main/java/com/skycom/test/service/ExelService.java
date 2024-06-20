@@ -61,9 +61,9 @@ public class ExelService {
                 continue;
             }
             
-            long id = (long) row.getCell(0).getNumericCellValue(); // id 필드가 bigint일 경우
+            long id = (long) row.getCell(0).getNumericCellValue();
             String gender = row.getCell(1).getStringCellValue();
-            int age = (int) row.getCell(2).getNumericCellValue(); // 나이 필드가 숫자형일 경우
+            int age = (int) row.getCell(2).getNumericCellValue();
             String location = row.getCell(3).getStringCellValue();
                         
             jdbcTemplate.update("INSERT INTO post (id, gender, age, location) VALUES (?, ?, ?, ?)",
