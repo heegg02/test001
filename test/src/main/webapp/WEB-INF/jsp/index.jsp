@@ -116,7 +116,7 @@ start: ./gradlew bootRun
                             <th></th>
                         </tr>
                         <c:forEach var="post" items="${posts}" varStatus="status">
-                            <tr id="postId_${post.id}" class="postRow">
+                            <tr class="postRow">
                                 <th>${(currentPage*10-10)+status.index+1}</th>
                                 <td>${post.id}</td>
                                 <td><input type="text" placeholder="${post.gender}" id="updateGender" value="${post.gender}"/></td>

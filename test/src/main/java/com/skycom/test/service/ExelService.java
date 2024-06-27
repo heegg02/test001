@@ -25,14 +25,14 @@ public class ExelService {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Posts");
         Row headerRow = sheet.createRow(0);
-        headerRow.createCell(0).setCellValue("ID");
-        headerRow.createCell(1).setCellValue("Gender");
-        headerRow.createCell(2).setCellValue("Age");
-        headerRow.createCell(3).setCellValue("Location");
+        headerRow.createCell(0).setCellValue("id");
+        headerRow.createCell(1).setCellValue("gender");
+        headerRow.createCell(2).setCellValue("age");
+        headerRow.createCell(3).setCellValue("location");
         for (int i = 0; i < posts.size(); i++) {
             Post post = posts.get(i);
             Row row = sheet.createRow(i + 1);
-            row.createCell(0).setCellValue(post.getId().toString());
+            row.createCell(0).setCellValue(post.getId());
             row.createCell(1).setCellValue(post.getGender());
             row.createCell(2).setCellValue(post.getAge());
             row.createCell(3).setCellValue(post.getLocation());
@@ -65,7 +65,6 @@ public class ExelService {
             String gender = row.getCell(1).getStringCellValue();
             int age = (int) row.getCell(2).getNumericCellValue();
             String location = row.getCell(3).getStringCellValue();
-                        
             jdbcTemplate.update("INSERT INTO post (id, gender, age, location) VALUES (?, ?, ?, ?)",
                                 id, gender, age, location);
         }

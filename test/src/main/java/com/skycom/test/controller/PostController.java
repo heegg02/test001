@@ -85,6 +85,9 @@ public class PostController {
 
     @PostMapping("/api/upload")
     public ResponseEntity<String> postMethodName(@RequestParam(name="file") MultipartFile file) throws IOException {
+        System.out.println(file.getOriginalFilename());
+        System.out.println(file.getSize());
+
         exelService.fileUpload(file);
         return ResponseEntity.ok("업로드 완료");
     }
