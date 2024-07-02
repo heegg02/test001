@@ -62,9 +62,9 @@ start: ./gradlew bootRun
     <title>test</title>
 </head>
 <body>
-    <div class="board_box nowrap">
+    <div class="board_box">
         <div>
-            <div class="exelContainer nowrap mb_10px">
+            <div class="exelContainer mb_10px">
                 <form id="uploadForm" class="nowrap" enctype="multipart/form-data">
                     <input id="uploadFileInput" type="file" name="file" accept=".xls, .xlsx"/>
                     <button id="uploadBtn" type="button" onclick="return uploadExel()">업로드</button>
